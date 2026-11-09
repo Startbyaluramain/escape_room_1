@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escape Room: Porta de Firewall 1</title>
+  <!-- Tipografia retrô e monoespaçada dos anos 90 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================================================
+       ESTILOS RETRÔ ANOS 90 (SISTEMA OPERACIONAL RETRÔ CAÓTICO)
+       ========================================================= */
+    :root {
+      --bg-lime: #ccff00;
+      --win-gray: #c0c0c0;
+      --win-dark-gray: #808080;
+      --win-light: #ffffff;
+      --win-navy: #000080;
+      --win-navy-light: #1084d0;
+      --text-black: #000000;
+      --alert-red: #d32f2f;
+      --alert-green: #2e7d32;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Share Tech Mono', 'Courier New', Courier, monospace;
+      -webkit-user-select: auto;
+    }
+
+    body {
+      background-color: var(--bg-lime);
+      background-image: 
+        linear-gradient(45deg, #b8e600 25%, transparent 25%), 
+        linear-gradient(-45deg, #b8e600 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #b8e600 75%), 
+        linear-gradient(-45deg, transparent 75%, #b8e600 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      color: var(--text-black);
+    }
+
+    /* Linhas de varredura CRT (opcional para imersão) */
+    .crt-overlay {
+      pointer-events: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+      background-size: 100% 3px, 6px 100%;
+      z-index: 9999;
+    }
+
+    /* Barra Superior do Sistema */
+    .retro-topbar {
+      width: 100%;
+      max-width: 900px;
+      background: var(--win-gray);
+      border: 2px solid;
+      border-color: var(--win-light) var(--win-dark-gray) var(--win-dark-gray) var(--win-light);
+      padding: 6px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-weight: bold;
+      font-size: 14px;
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.4);
+    }
+
+    .retro-topbar .title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-badge {
+      background: #000;
+      color: var(--bg-lime);
+      padding: 2px 8px;
+      border-radius: 2px;
+      font-size: 13px;
+    }
+
+    /* Janela Principal do Escape Room */
+    .main-window {
+      width: 100%;
+      max-width: 900px;
+      background: var(--win-gray);
+      border: 3px solid;
+      border-color: var(--win-light) var(--win-dark-gray) var(--win-dark-gray) var(--win-light);
+      box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Barra de Título 90s */
+    .title-bar {
+      background: linear-gradient(90deg, var(--win-navy), var(--win-navy-light));
+      color: var(--win-light);
+      padding: 4px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      font-size: 14px;
+    }
+
+    .title-bar-controls {
+      display: flex;
+      gap: 4px;
+    }
+
+    .win-btn {
+      width: 18px;
+      height: 18px;
+      background: var(--win-gray);
+      border: 2px solid;
+      border-color: var(--win-light) var(--win-dark-gray) var(--win-dark-gray) var(--win-light);
+      font-size: 11px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .win-btn:active {
+      border-color: var(--win-dark-gray) var(--win-light) var(--win-light) var(--win-dark-gray);
+    }
+
+    /* Abas de Navegação das 3 Fases */
+    .tab-bar {
+      display: flex;
+      background: #b0b0b0;
+      padding: 8px 8px 0 8px;
+      gap: 4px;
+      border-bottom: 2px solid var(--win-dark-gray);
+    }
+
+    .tab-button {
+      padding: 8px 16px;
+      background: #a0a0a0;
+      border: 2px solid;
+      border-color: var(--win-light) var(--win-dark-gray) transparent var(--win-light);
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+      top: 2px;
+      transition: background 0.1s;
+    }
+
+    .tab-button.active {
+      background: var(--win-gray);
+      top: 0;
+      padding-top: 10px;
+      border-bottom: 2px solid var(--win-gray);
+      z-index: 2;
+    }
+
+    .tab-button.locked {
+      color: #666;
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
+
+    .tab-button.completed {
+      color: #004d00;
+    }
+
+    /* Conteúdo das Abas */
+    .tab-content {
+      display: none;
+      padding: 16px;
+      min-height: 480px;
+      background: var(--win-gray);
+      position: relative;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Painel Rebaixado Clássico (Inset) */
+    .sunken-panel {
+      background: #dfdfdf;
+      border: 2px solid;
+      border-color: var(--win-dark-gray) var(--win-light) var(--win-light) var(--win-dark-gray);
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .banner-warning {
+      background: #fff3cd;
+      border: 2px solid #856404;
+      color: #856404;
+      padding: 10px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* =========================================================
+       ENIGMA 1.1: TINTA INVISÍVEL
+       ========================================================= */
+    .invisible-box-container {
+      margin: 14px 0;
+      position: relative;
+    }
+
+    /* Área com texto branco em fundo branco (invisível a olho nu) */
+    .invisible-box {
+      background-color: #ffffff;
+      color: #ffffff;
+      border: 2px inset var(--win-dark-gray);
+      padding: 16px;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 140px;
+      user-select: text;
+      -webkit-user-select: text;
+      cursor: text;
+      position: relative;
+      word-break: break-word;
+    }
+
+    /* Quando selecionado pelo mouse, o texto é revelado! */
+    .invisible-box::selection {
+      background-color: var(--win-navy);
+      color: #ffffff;
+    }
+    .invisible-box::-moz-selection {
+      background-color: var(--win-navy);
+      color: #ffffff;
+    }
+
+    .terminal-input-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      align-items: stretch;
+    }
+
+    .terminal-input {
+      flex: 1;
+      padding: 8px 12px;
+      font-size: 15px;
+      background: #ffffff;
+      border: 2px solid;
+      border-color: var(--win-dark-gray) var(--win-light) var(--win-light) var(--win-dark-gray);
+      outline: none;
+      font-weight: bold;
+    }
+
+    .terminal-input:focus {
+      border-color: #000;
+    }
+
+    .retro-btn {
+      background: var(--win-gray);
+      border: 2px solid;
+      border-color: var(--win-light) var(--win-dark-gray) var(--win-dark-gray) var(--win-light);
+      padding: 8px 20px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .retro-btn:active {
+      border-color: var(--win-dark-gray) var(--win-light) var(--win-light) var(--win-dark-gray);
+      padding: 9px 19px 7px 21px;
+    }
+
+    .feedback-msg {
+      margin-top: 12px;
+      padding: 10px;
+      font-weight: bold;
+      display: none;
+    }
+
+    .feedback-msg.error {
+      display: block;
+      background: #ffebee;
+      color: var(--alert-red);
+      border: 2px solid var(--alert-red);
+    }
+
+    .feedback-msg.success {
+      display: block;
+      background: #e8f5e9;
+      color: var(--alert-green);
+      border: 2px solid var(--alert-green);
+    }
+
+    /* =========================================================
+       ENIGMA 1.2: O CAMPO MINADO DE POP-UPS
+       ========================================================= */
+    .popup-arena {
+      width: 100%;
+      height: 380px;
+      background: #008080; /* Clássico verde-azulado do Windows 95/98 */
+      border: 3px inset var(--win-dark-gray);
+      position: relative;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+
+    .arena-status {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px;
+      background: #222;
+      color: #fff;
+      font-size: 13px;
+      font-weight: bold;
+      border: 2px inset var(--win-dark-gray);
+    }
+
+    /* Janela de Vírus Vermelho */
+    .virus-window {
+      position: absolute;
+      width: 92px;
+      height: 80px;
+      background: #ff2222;
+      border: 2px solid;
+      border-color: #ffffff #550000 #550000 #ffffff;
+      box-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      z-index: 10;
+      transition: transform 0.1s ease;
+    }
+
+    .virus-header {
+      background: #990000;
+      color: white;
+      font-size: 9px;
+      font-weight: bold;
+      padding: 2px 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .virus-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+      pointer-events: none;
+    }
+
+    .virus-body span {
+      font-size: 10px;
+      color: #ffeeee;
+    }
+
+    /* CD-ROM Dourado feito 100% com CSS */
+    .cdrom-item {
+      position: absolute;
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      background: radial-gradient(circle, 
+        #008080 0% 18%, 
+        #ffd700 19% 45%, 
+        #fff7a0 50%, 
+        #cca000 65%, 
+        #ffd700 100%);
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.7), 2px 2px 4px rgba(0,0,0,0.5);
+      border: 2px solid #e6b800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      z-index: 10;
+    }
+
+    .cdrom-inner-hole {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #008080;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .cdrom-label {
+      position: absolute;
+      bottom: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      background: #000;
+      color: #ffd700;
+      padding: 1px 4px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* =========================================================
+       ENIGMA 1.3: ARRASTAR E SOLTAR (DRAG AND DROP)
+       ========================================================= */
+    .drag-workspace {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    /* As 3 Pastas Alvo */
+    .folders-zone {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .folder-dropzone {
+      background: #e9e9e9;
+      border: 2px dashed #666;
+      padding: 12px 8px;
+      min-height: 130px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .folder-dropzone.drag-hover {
+      background: #fff8dc;
+      border-color: #000080;
+      border-style: solid;
+      transform: scale(1.02);
+    }
+
+    .folder-icon {
+      font-size: 32px;
+      margin-bottom: 4px;
+    }
+
+    .folder-name {
+      font-size: 13px;
+      font-weight: bold;
+      color: #000;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .folder-rule {
+      font-size: 10px;
+      color: #555;
+      text-align: center;
+    }
+
+    .folder-count {
+      margin-top: auto;
+      font-size: 11px;
+      font-weight: bold;
+      background: #fff;
+      border: 1px solid #999;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    /* Área dos Arquivos Espalhados */
+    .files-pool-container {
+      background: #2f4f4f;
+      border: 2px inset var(--win-dark-gray);
+      padding: 14px;
+      min-height: 180px;
+    }
+
+    .files-pool-title {
+      color: #ccff00;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .files-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .file-card {
+      width: 140px;
+      background: #ffffff;
+      border: 2px solid;
+      border-color: var(--win-light) var(--win-dark-gray) var(--win-dark-gray) var(--win-light);
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: grab;
+      user-select: none;
+      box-shadow: 2px 2px 0px rgba(0,0,0,0.4);
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .file-card:active {
+      cursor: grabbing;
+      box-shadow: 1px 1px 0px rgba(0,0,0,0.4);
+    }
+
+    .file-icon {
+      font-size: 22px;
+    }
+
+    .file-name {
+      word-break: break-all;
+      line-height: 1.2;
+    }
+
+    /* =========================================================
+       TELA FINAL: VITÓRIA DO FIREWALL DESBLOQUEADO
+       ========================================================= */
+    .victory-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .victory-modal.show {
+      display: flex;
+      animation: flashScreen 0.5s ease-in-out;
+    }
+
+    @keyframes flashScreen {
+      0% { background: #ccff00; }
+      50% { background: #ffffff; }
+      100% { background: rgba(0, 0, 0, 0.85); }
+    }
+
+    .victory-window {
+      background: var(--win-gray);
+      border: 4px solid;
+      border-color: var(--win-light) var(--win-dark-gray) var(--win-dark-gray) var(--win-light);
+      max-width: 650px;
+      width: 100%;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 6px 6px 0px #000;
+      text-align: center;
+    }
+
+    .victory-header-banner {
+      background: #006600;
+      color: #ccff00;
+      padding: 12px 16px;
+      font-size: 22px;
+      font-family: 'VT323', monospace;
+      letter-spacing: 2px;
+      border-bottom: 3px solid #000;
+      text-shadow: 2px 2px #003300;
+      flex-shrink: 0;
+    }
+
+    .victory-body {
+      padding: 18px 22px;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-y: auto;
+      max-height: 80vh;
+    }
+
+    .final-report-box {
+      background: #ffffff;
+      border: 2px inset #fff;
+      padding: 10px 12px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+      line-height: 1.4;
+      text-align: left;
+      white-space: pre-wrap;
+      user-select: text;
+      cursor: text;
+      box-shadow: inset 2px 2px 0px #808080;
+      color: #111;
+      max-height: 170px;
+      overflow-y: auto;
+    }
+
+    .final-task-box {
+      margin-top: 12px;
+      background: #ffffcc;
+      border: 2px solid #808000;
+      padding: 10px 12px;
+      text-align: left;
+      box-shadow: inset 1px 1px 0px #fff;
+    }
+
+    .key-badge {
+      display: inline-block;
+      margin: 16px 0;
+      padding: 12px 24px;
+      background: #000;
+      color: #ccff00;
+      border: 2px dashed #ccff00;
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      font-family: 'VT323', monospace;
+    }
+
+    /* Rodapé da Janela */
+    .retro-statusbar {
+      background: var(--win-gray);
+      border-top: 2px solid var(--win-dark-gray);
+      padding: 4px 8px;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      color: #333;
+    }
+
+    /* Responsividade */
+    @media (max-width: 600px) {
+      .folders-zone {
+        grid-template-columns: 1fr;
+      }
+      .file-card {
+        width: 100%;
+      }
+      .tab-button {
+        padding: 6px 8px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Informações do Sistema -->
+  <div class="retro-topbar">
+    <div class="title">
+      <span>🖥️ TERMINAL_SEGURANCA_V1.99.EXE</span>
+      <span class="status-badge" id="statusBadge">FIREWALL 1 ATIVO</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <button id="soundToggleBtn" class="win-btn" onclick="toggleAudio()" style="font-size: 11px; padding: 2px 8px; font-weight: bold; cursor: pointer;" title="Ativar ou desativar efeitos sonoros retrô">
+        🔊 SOM: ON
+      </button>
+      <div id="clockDisplay" style="background: #dfdfdf; border: 2px inset var(--win-dark-gray); padding: 2px 6px; font-family: monospace; font-size: 12px;">09:45:12</div>
+    </div>
+  </div>
+
+  <!-- Janela Principal -->
+  <main class="main-window">
+    <div class="title-bar">
+      <span>🛡️ PROTOCOLO ESCAPE: PORTA DE FIREWALL 1</span>
+      <div class="title-bar-controls">
+        <button class="win-btn" title="Minimizar">_</button>
+        <button class="win-btn" title="Maximizar">□</button>
+        <button class="win-btn" title="Ajuda">?</button>
+      </div>
+    </div>
+
+    <!-- Abas Sequenciais dos 3 Enigmas -->
+    <nav class="tab-bar">
+      <button id="tabBtn1" class="tab-button active" onclick="switchTab(1)">
+        <span>🔒</span> Enigma 1.1
+      </button>
+      <button id="tabBtn2" class="tab-button locked" onclick="switchTab(2)">
+        <span>🔒</span> Enigma 1.2
+      </button>
+      <button id="tabBtn3" class="tab-button locked" onclick="switchTab(3)">
+        <span>🔒</span> Enigma 1.3
+      </button>
+    </nav>
+
+    <!-- ==========================================
+         FASE 1: ENIGMA 1.1 (A Mensagem Escondida)
+         ========================================== -->
+    <section id="phase1" class="tab-content active">
+      <div class="sunken-panel">
+        <h2 style="font-size: 18px; margin-bottom: 6px;">ENIGMA 1.1: A Mensagem Escondida</h2>
+      </div>
+
+      <div class="banner-warning">
+        <span>👁️</span>
+        <span>
+          "O que não pode ser visto, precisa ser revelado."<br>
+          Leia a mensagem deixada pelo Guardião e desvende a charada. Use seus conhecimentos sobre como selecionar textos para resolver o enigma.
+        </span>
+      </div>
+
+      <!-- Caixa com texto branco sobre fundo branco (sem elementos sobrepostos) -->
+      <div class="invisible-box-container">
+        <div class="invisible-box" id="invisibleBox" title="Selecione este texto com o mouse">
+[LOG_ERRO_99] O Guardião exige um teste de visão e lógica.
+Charada: "Tenho cauda, mas não sou bicho. Deslizo pela mesa, mas não tenho pernas. Um clique meu abre portas no mundo digital."
+Identifique a resposta correta no meio do lixo de dados abaixo e copie apenas ela:
+[DADOS]: o teclado barulhento | a tela de vidro | rato inglês | o CD-ROM riscado
+        </div>
+      </div>
+
+      <!-- Barra de Ação de Seleção e Cópia (posicionada FORA da caixa para não cobrir a mensagem) -->
+      <div class="selection-action-bar" style="margin-top: 6px; background: var(--win-gray); border: 2px inset var(--win-dark-gray); padding: 6px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; min-width: 0; flex: 1;">
+          <strong style="white-space: nowrap;">🖱️ Texto selecionado com o mouse:</strong>
+          <div id="selectionPreview" style="background: #fff; border: 1px solid #808080; padding: 3px 8px; font-family: monospace; font-size: 12px; min-height: 24px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #666; font-style: italic; display: flex; align-items: center;">
+            Arraste o cursor do mouse sobre o quadro branco acima para revelar o texto
+          </div>
+        </div>
+        <button 
+          id="copySelectedBtn" 
+          class="retro-btn" 
+          disabled
+          style="font-size: 12px; padding: 4px 14px; opacity: 0.5; cursor: not-allowed; font-weight: bold; white-space: nowrap;"
+          onclick="copySelectedText()"
+          title="Selecione o texto com o mouse primeiro"
+        >
+          📋 Copiar Texto Selecionado
+        </button>
+      </div>
+
+      <div class="terminal-input-row" style="margin-top: 6px;">
+        <input 
+          type="text" 
+          id="phase1Input" 
+          class="terminal-input" 
+          placeholder="Cole ou digite aqui a resposta exata da charada..."
+          autocomplete="off"
+        />
+        <button type="button" class="retro-btn" onclick="pasteToInput()" title="Colar texto da Área de Transferência">
+          <span>📋</span> Colar
+        </button>
+        <button class="retro-btn" onclick="validatePhase1()">
+          <span>▶</span> Executar
+        </button>
+      </div>
+
+      <div id="phase1Feedback" class="feedback-msg"></div>
+    </section>
+
+    <!-- ==========================================
+         FASE 2: ENIGMA 1.2 (O Campo Minado de Pop-ups)
+         ========================================== -->
+    <section id="phase2" class="tab-content">
+      <div class="sunken-panel">
+        <h2 style="font-size: 18px; margin-bottom: 6px;">ENIGMA 1.2: O Campo Minado de Pop-ups</h2>
+      </div>
+
+      <div class="banner-warning" style="background: #e1f5fe; border-color: #0288d1; color: #01579b;">
+        <span>⚡</span>
+        <span>ATENÇÃO: Dê <strong>DUPLO CLIQUE RÁPIDO</strong> com o mouse para eliminar todos os 10 Trojans e desbloquear o Enigma 1.3!</span>
+      </div>
+
+      <div class="arena-status">
+        <span id="virusCounterText">👾 Trojans restantes: 10 / 10</span>
+        <span id="trojanHelpText" style="color: #bbb; font-size: 12px;">🎯 Dê duplo clique em cada janela para eliminá-la</span>
+      </div>
+
+      <div class="popup-arena" id="popupArena">
+        <!-- Elementos inseridos dinamicamente pelo JavaScript -->
+      </div>
+
+      <div id="phase2Feedback" class="feedback-msg"></div>
+    </section>
+
+    <!-- ==========================================
+         FASE 3: ENIGMA 1.3 (A Recuperação de Dados)
+         ========================================== -->
+    <section id="phase3" class="tab-content">
+      <div class="sunken-panel">
+        <h2 style="font-size: 18px; margin-bottom: 6px;">ENIGMA 1.3: A Recuperação de Dados</h2>
+      </div>
+
+      <p style="font-size: 13px; margin-bottom: 12px; color: #111;">
+        📁 A área de trabalho está uma bagunça e o Guardião exige organização total! Arraste os <strong>9 arquivos perdidos</strong> para suas respectivas pastas corretas.
+      </p>
+
+      <!-- 3 Pastas de Destino -->
+      <div class="folders-zone">
+        <!-- Pasta 1: DOCUMENTOS -->
+        <div class="folder-dropzone" id="folder-DOCUMENTOS" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'DOCUMENTOS')">
+          <div class="folder-icon">📁</div>
+          <div class="folder-name">DOCUMENTOS</div>
+          <div class="folder-rule">Aceita: .doc, .txt, .pdf</div>
+          <div class="folder-count" id="count-DOCUMENTOS">0 / 3 arquivos</div>
+        </div>
+
+        <!-- Pasta 2: IMAGENS -->
+        <div class="folder-dropzone" id="folder-IMAGENS" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'IMAGENS')">
+          <div class="folder-icon">📁</div>
+          <div class="folder-name">IMAGENS</div>
+          <div class="folder-rule">Aceita: .bmp, .gif, .jpg</div>
+          <div class="folder-count" id="count-IMAGENS">0 / 3 arquivos</div>
+        </div>
+
+        <!-- Pasta 3: PROGRAMAS -->
+        <div class="folder-dropzone" id="folder-PROGRAMAS" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'PROGRAMAS')">
+          <div class="folder-icon">📁</div>
+          <div class="folder-name">PROGRAMAS</div>
+          <div class="folder-rule">Aceita: .exe, .bat</div>
+          <div class="folder-count" id="count-PROGRAMAS">0 / 3 arquivos</div>
+        </div>
+      </div>
+
+      <!-- Arquivos Espalhados (Origem) -->
+      <div class="files-pool-container">
+        <div class="files-pool-title">
+          <span>ARQUIVOS CORROMPIDOS NA MEMÓRIA VOLÁTIL (ARRASTE PARA AS PASTAS ACIMA)</span>
+          <span id="filesRemainingLabel">9 restantes</span>
+        </div>
+        <div class="files-grid" id="filesGrid">
+          <!-- Os 9 arquivos são gerados ou posicionados aqui -->
+        </div>
+      </div>
+
+      <div id="phase3Feedback" class="feedback-msg"></div>
+    </section>
+
+    <!-- Rodapé -->
+    <footer class="retro-statusbar" style="justify-content: flex-end;">
+      <span id="globalProgress">Progresso: 0 de 3 Enigmas</span>
+    </footer>
+  </main>
+
+  <!-- ==========================================
+       MODAL DE VITÓRIA (PORTA DESBLOQUEADA)
+       ========================================== -->
+  <div id="victoryModal" class="victory-modal">
+    <div class="victory-window">
+      <div class="victory-header-banner">
+        🚨 PORTA DE FIREWALL 1 DESBLOQUEADA 🚨
+      </div>
+      <div class="victory-body">
+        <h3 style="font-size: 19px; color: #006600; margin-bottom: 6px;">ACESSO DE SEGURANÇA TOTALMENTE CONCEDIDO!</h3>
+        <p style="font-size: 13px; color: #333; margin-bottom: 10px;">
+          Parabéns, Recruta! Você quebrou as defesas do Guardião e completou com maestria todas as três provas de competência digital.
+        </p>
+
+        <!-- RELATÓRIO FINAL COM A CHAVE INCLUÍDA NO TEXTO -->
+        <div style="text-align: left; margin: 10px 0 4px; font-size: 12px; font-weight: bold; color: #222; display: flex; justify-content: space-between;">
+          <span>📄 RELATÓRIO FINAL DE AUDITORIA E DESBLOQUEIO:</span>
+          <span style="font-size: 11px; font-weight: normal; color: #555;">Selecione com o mouse</span>
+        </div>
+        <div id="finalReportText" class="final-report-box" onmouseup="trackFinalReportSelection()">============================================================
+       RELATÓRIO TÉCNICO DE AUDITORIA E DESBLOQUEIO
+                PORTA DE FIREWALL 1 - 1999
+============================================================
+AGENTE RESPONSÁVEL : RECRUTA_SEGURANCA_01
+SISTEMA ALVO       : MAINFRAME_CENTRAL_DEFENSE
+STATUS DA PORTA 1  : DESBLOQUEADA COM SUCESSO
+
+DESAFIOS CONCLUÍDOS COM O MOUSE:
+[+] Enigma 1.1: Revelação de mensagem oculta ("rato inglês").
+[+] Enigma 1.2: Neutralização de 10 vírus via duplo clique veloz.
+[+] Enigma 1.3: Triagem de 9 arquivos corrompidos (Drag & Drop).
+
+CREDENCIAL CRIPTOGRÁFICA GERADA PARA O FIREWALL 2:
+CHAVE DE ACESSO: CHAVE-FIREWALL-ALPHA-1999
+NÍVEL DE PERMISSÃO: AUTORIZADO PARA AVANÇAR À PORTA 2
+============================================================</div>
+
+        <!-- TAREFA FINAL: SELECIONAR COM O MOUSE E CLICAR EM COPIAR -->
+        <div class="final-task-box">
+          <div style="font-weight: bold; font-size: 13px; color: #422006; margin-bottom: 4px;">
+            🎯 TAREFA FINAL DO PROTOCOLO:
+          </div>
+          <p style="font-size: 12px; color: #713f12; margin-bottom: 8px;">
+            Para validar sua credencial de segurança, use o <strong>MOUSE</strong> para selecionar todo o texto do relatório acima e em seguida clique no botão <strong>"Copiar"</strong> abaixo. Depois, cole o texto no documento de texto que criamos na pasta do Google Drive.
+          </p>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <button type="button" id="finalCopyBtn" class="btn-retro" onclick="copyFinalReportSelection()" style="padding: 5px 14px; font-weight: bold; cursor: pointer;">
+              📋 Copiar
+            </button>
+            <span id="finalSelectedPreview" style="font-size: 11px; font-style: italic; color: #555;">(Nenhum texto selecionado ainda)</span>
+          </div>
+          <div id="finalTaskFeedback" class="feedback-msg" style="margin-top: 8px; font-size: 12px;"></div>
+        </div>
+
+        <div style="margin-top: 14px;">
+          <button class="retro-btn" style="margin: 0 auto;" onclick="restartEscapeRoom()">
+            🔄 Reiniciar Missão da Porta 1
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       LÓGICA JAVASCRIPT INTEGRADA E COMENTADA
+       ========================================================= -->
+  <script>
+    /* =========================================================
+       GERADOR DE EFEITOS SONOROS RETRÔ (WEB AUDIO API PURA)
+       100% autônomo, sem bibliotecas externas
+       ========================================================= */
+    class RetroAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+
+      getContext() {
+        if (!this.enabled) return null;
+        if (!this.ctx && typeof window !== 'undefined') {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+        return this.ctx;
+      }
+
+      playClick() {
+        const ctx = this.getContext();
+        if (!ctx) return;
+        try {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(800, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.03);
+          gain.gain.setValueAtTime(0.12, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.03);
+        } catch(e) {}
+      }
+
+      playSuccess() {
+        const ctx = this.getContext();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+            gain.gain.setValueAtTime(0.15, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + (idx + 1) * 0.08);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.08);
+            osc.stop(now + (idx + 1) * 0.08);
+          });
+        } catch(e) {}
+      }
+
+      playError() {
+        const ctx = this.getContext();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(140, now);
+          osc.frequency.setValueAtTime(110, now + 0.1);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } catch(e) {}
+      }
+
+      playVirusPop() {
+        const ctx = this.getContext();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(450, now);
+          osc.frequency.exponentialRampToValueAtTime(90, now + 0.08);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } catch(e) {}
+      }
+
+      playAlert() {
+        const ctx = this.getContext();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          for (let i = 0; i < 2; i++) {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(750, now + i * 0.12);
+            gain.gain.setValueAtTime(0.2, now + i * 0.12);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.12 + 0.09);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + i * 0.12);
+            osc.stop(now + i * 0.12 + 0.09);
+          }
+        } catch(e) {}
+      }
+
+      playVictoryFanfare() {
+        const ctx = this.getContext();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const melody = [
+            { f: 440, d: 0.12 },
+            { f: 554.37, d: 0.12 },
+            { f: 659.25, d: 0.12 },
+            { f: 880, d: 0.35 }
+          ];
+          let t = now;
+          melody.forEach(item => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(item.f, t);
+            gain.gain.setValueAtTime(0.22, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + item.d);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(t);
+            osc.stop(t + item.d);
+            t += item.d + 0.04;
+          });
+        } catch(e) {}
+      }
+    }
+
+    const soundFx = new RetroAudioEngine();
+
+    function toggleAudio() {
+      soundFx.enabled = !soundFx.enabled;
+      const btn = document.getElementById('soundToggleBtn');
+      if (btn) {
+        btn.textContent = soundFx.enabled ? '🔊 SOM: ON' : '🔇 SOM: OFF';
+      }
+    }
+
+    /* Estado global do Escape Room */
+    const gameState = {
+      phase1Solved: false,
+      phase2Solved: false,
+      phase3Solved: false,
+      currentTab: 1,
+      virusesRemaining: 10,
+      totalViruses: 10,
+      cdromsCount: 5,
+      // Mapeamento dos 9 arquivos para suas respectivas pastas corretas (embaralhados)
+      files: [
+        { id: "f7", name: "jogo_cobrinha.exe", icon: "👾", targetFolder: "PROGRAMAS" },
+        { id: "f1", name: "boletim_1999.doc", icon: "📄", targetFolder: "DOCUMENTOS" },
+        { id: "f4", name: "foto_diretor.bmp", icon: "🖼️", targetFolder: "IMAGENS" },
+        { id: "f8", name: "antivirus.bat", icon: "👾", targetFolder: "PROGRAMAS" },
+        { id: "f2", name: "trabalho_ciencias.txt", icon: "📄", targetFolder: "DOCUMENTOS" },
+        { id: "f6", name: "logo_colegio.jpg", icon: "🖼️", targetFolder: "IMAGENS" },
+        { id: "f9", name: "discador_net.exe", icon: "👾", targetFolder: "PROGRAMAS" },
+        { id: "f3", name: "regras_escola.pdf", icon: "📄", targetFolder: "DOCUMENTOS" },
+        { id: "f5", name: "mascote_pixel.gif", icon: "🖼️", targetFolder: "IMAGENS" }
+      ],
+      folderCounts: {
+        DOCUMENTOS: 0,
+        IMAGENS: 0,
+        PROGRAMAS: 0
+      }
+    };
+
+    /* Relógio Retrô */
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('clockDisplay').textContent = `${h}:${m}:${s}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    /* =========================================================
+       NAVEGAÇÃO POR ABAS
+       ========================================================= */
+    function switchTab(tabNum) {
+      // Bloqueia avanço para abas não liberadas
+      if (tabNum === 2 && !gameState.phase1Solved) {
+        soundFx.playError();
+        alert("🔒 Acesso Negado! Você precisa concluir o Enigma 1.1 primeiro.");
+        return;
+      }
+      if (tabNum === 3 && !gameState.phase2Solved) {
+        soundFx.playError();
+        alert("🔒 Acesso Negado! Você precisa concluir o Enigma 1.2 primeiro.");
+        return;
+      }
+
+      soundFx.playClick();
+      gameState.currentTab = tabNum;
+
+      // Atualiza botões das abas
+      for (let i = 1; i <= 3; i++) {
+        const btn = document.getElementById(`tabBtn${i}`);
+        const content = document.getElementById(`phase${i}`);
+        if (i === tabNum) {
+          btn.classList.add('active');
+          content.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+          content.classList.remove('active');
+        }
+      }
+
+      // Se abriu a fase 2 e ainda não populou, inicializa o campo minado
+      if (tabNum === 2 && !gameState.phase2Solved) {
+        initPhase2Arena();
+      }
+    }
+
+    /* Atualiza o status global no rodapé */
+    function updateGlobalProgress() {
+      let count = 0;
+      if (gameState.phase1Solved) count++;
+      if (gameState.phase2Solved) count++;
+      if (gameState.phase3Solved) count++;
+      document.getElementById('globalProgress').textContent = `Progresso: ${count} de 3 Enigmas Resolvidos`;
+    }
+
+    /* =========================================================
+       LÓGICA DO ENIGMA 1.1: A Tinta Invisível & Botão de Cópia
+       ========================================================= */
+    let currentSelectedString = "";
+
+    // Detecta quando o aluno seleciona o texto invisível
+    function handleSelectionCheck() {
+      const selection = window.getSelection();
+      const btn = document.getElementById('copySelectedBtn');
+      const preview = document.getElementById('selectionPreview');
+      if (selection && !selection.isCollapsed) {
+        const text = selection.toString().trim();
+        if (text.length > 0) {
+          currentSelectedString = text;
+          if (btn) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.title = 'Copiar texto selecionado para a Área de Transferência';
+          }
+          if (preview) {
+            preview.textContent = text;
+            preview.style.color = '#000080';
+            preview.style.fontWeight = 'bold';
+            preview.style.fontStyle = 'normal';
+          }
+          return;
+        }
+      }
+    }
+
+    document.addEventListener('selectionchange', () => {
+      const selection = window.getSelection();
+      const box = document.getElementById('invisibleBox');
+      if (selection && !selection.isCollapsed && box && box.contains(selection.anchorNode)) {
+        handleSelectionCheck();
+      }
+    });
+
+    // Copia o texto selecionado para a Área de Transferência
+    function copySelectedText() {
+      soundFx.playClick();
+      if (!currentSelectedString) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(currentSelectedString).catch(() => {});
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = currentSelectedString;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch(e) {}
+        document.body.removeChild(ta);
+      }
+
+      const btn = document.getElementById('copySelectedBtn');
+      if (btn) {
+        btn.textContent = '✅ Copiado!';
+        setTimeout(() => {
+          btn.textContent = '📋 Copiar Texto Selecionado';
+        }, 2000);
+      }
+    }
+
+    // Cola o texto no campo input
+    async function pasteToInput() {
+      soundFx.playClick();
+      let text = '';
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          text = await navigator.clipboard.readText();
+        }
+      } catch (e) {}
+
+      if (!text && currentSelectedString) {
+        text = currentSelectedString;
+      }
+
+      if (text) {
+        const input = document.getElementById('phase1Input');
+        input.value = text;
+        input.focus();
+      }
+    }
+
+    function validatePhase1() {
+      const input = document.getElementById('phase1Input');
+      const feedback = document.getElementById('phase1Feedback');
+      
+      // Sanitização da resposta do aluno: minúsculas e sem espaços extras
+      const rawValue = input.value.trim().toLowerCase();
+      // Remove acentos para tolerância de digitação sem comprometer a exatidão
+      const normalizedValue = rawValue.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+
+      if (normalizedValue === "rato ingles" || rawValue === "rato inglês") {
+        soundFx.playSuccess();
+        gameState.phase1Solved = true;
+        feedback.className = "feedback-msg success";
+        feedback.innerHTML = "✅ ACESSO 1 LIBERADO! Charada decifrada com sucesso (Mouse = 'rato inglês'). A Porta 1.2 foi desbloqueada!";
+        
+        // Atualiza a aba 1 como concluída
+        const tab1 = document.getElementById('tabBtn1');
+        tab1.classList.add('completed');
+        tab1.innerHTML = '<span>✔</span> Enigma 1.1';
+
+        // Desbloqueia a aba 2
+        const tab2 = document.getElementById('tabBtn2');
+        tab2.classList.remove('locked');
+        tab2.innerHTML = '<span>🔓</span> Enigma 1.2';
+
+        updateGlobalProgress();
+
+        // Transição suave para a próxima fase após 1.2 segundos
+        setTimeout(() => {
+          switchTab(2);
+        }, 1200);
+      } else {
+        soundFx.playError();
+        feedback.className = "feedback-msg error";
+        feedback.innerHTML = "❌ ACESSO NEGADO! A resposta informada não confere com o item correto do [DADOS]. Selecione o texto invisível com o mouse, encontre a resposta da charada e copie apenas ela!";
+        input.value = ""; // Limpa o campo conforme especificado
+        input.focus();
+      }
+    }
+
+    function notifyKeyboardShortcutBlocked() {
+      soundFx.playAlert();
+      showTemporaryFeedback("phase1Feedback", "⚠️ ATALHO BLOQUEADO: Atalhos de teclado (Ctrl+C e Ctrl+V) estão desativados! Use apenas o MOUSE para selecionar, copiar e colar.", true);
+    }
+
+    // Intercepta e bloqueia Ctrl+C e Ctrl+V no Enigma 1.1 e na Tarefa Final
+    window.addEventListener('keydown', function(e) {
+      const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+      if (isCtrlOrCmd && (e.key === 'c' || e.key === 'C' || e.key === 'v' || e.key === 'V')) {
+        const modal = document.getElementById('victoryModal');
+        if (modal && modal.classList.contains('show')) {
+          e.preventDefault();
+          e.stopPropagation();
+          const fb = document.getElementById('finalTaskFeedback');
+          if (fb) {
+            fb.className = "feedback-msg error";
+            fb.style.display = "block";
+            fb.innerHTML = "⚠️ ATALHO BLOQUEADO: Atalhos de teclado estão desativados! Use o mouse para selecionar todo o texto do relatório e clique no botão 'Copiar'.";
+          }
+          return;
+        }
+
+        if (gameState.currentTab === 1) {
+          e.preventDefault();
+          e.stopPropagation();
+          notifyKeyboardShortcutBlocked();
+        }
+      }
+    }, true);
+
+    // Permitir pressionar "Enter" e bloquear atalhos no input do Enigma 1.1
+    const phase1InputEl = document.getElementById('phase1Input');
+    phase1InputEl.addEventListener('keydown', function(e) {
+      const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+      if (isCtrlOrCmd && (e.key === 'c' || e.key === 'C' || e.key === 'v' || e.key === 'V')) {
+        e.preventDefault();
+        e.stopPropagation();
+        notifyKeyboardShortcutBlocked();
+      } else if (e.key === 'Enter') {
+        validatePhase1();
+      }
+    });
+
+    phase1InputEl.addEventListener('paste', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      notifyKeyboardShortcutBlocked();
+    });
+
+    /* =========================================================
+       LÓGICA DO ENIGMA 1.2: O Campo Minado de Pop-ups (10 Trojans)
+       ========================================================= */
+    let arenaElements = [];
+    let arenaAnimationInterval = null;
+    const TOTAL_TROJANS = 10;
+
+    function initPhase2Arena() {
+      const arena = document.getElementById('popupArena');
+      if (!arena) return;
+      arena.innerHTML = '';
+      arenaElements = [];
+      gameState.eliminatedTrojans = 0;
+      gameState.virusesRemaining = TOTAL_TROJANS;
+      updatePhase2Status();
+
+      const arenaWidth = arena.clientWidth || 700;
+      const arenaHeight = arena.clientHeight || 380;
+
+      // Cria EXATAMENTE 10 Trojans (sem CD-ROMs)
+      for (let i = 1; i <= TOTAL_TROJANS; i++) {
+        createTrojanElement(arena, arenaWidth, arenaHeight, i);
+      }
+
+      // Inicia movimento dos Trojans na arena
+      if (arenaAnimationInterval) clearInterval(arenaAnimationInterval);
+      arenaAnimationInterval = setInterval(moveArenaElements, 28);
+    }
+
+    function createTrojanElement(arena, maxWidth, maxHeight, index) {
+      const el = document.createElement('div');
+      el.className = 'virus-window';
+      el.id = `trojan-${index}`;
+      
+      el.innerHTML = `
+        <div class="virus-header">
+          <span>TROJAN_${index}</span>
+          <span>×</span>
+        </div>
+        <div class="virus-body">
+          ✕
+          <span>TROJAN</span>
+        </div>
+      `;
+
+      // Posicionamento aleatório inicial dentro dos limites da arena
+      const x = Math.max(10, Math.min(maxWidth - 100, Math.random() * (maxWidth - 110)));
+      const y = Math.max(10, Math.min(maxHeight - 90, Math.random() * (maxHeight - 100)));
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+
+      // Velocidades dinâmicas e equilibradas
+      const dirX = Math.random() > 0.5 ? 1 : -1;
+      const dirY = Math.random() > 0.5 ? 1 : -1;
+      const vx = dirX * (2.2 + Math.random() * 1.0);
+      const vy = dirY * (2.2 + Math.random() * 1.0);
+
+      // Tratamento confiável de DUPLO CLIQUE (tanto ondblclick nativo quanto duplo clique rápido)
+      let lastClickTime = 0;
+      function triggerDestroy(e) {
+        if (e) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
+        destroyVirus(el);
+      }
+
+      el.ondblclick = triggerDestroy;
+
+      el.onclick = function(e) {
+        e.stopPropagation();
+        const now = Date.now();
+        if (now - lastClickTime < 500) {
+          triggerDestroy(e);
+          lastClickTime = 0;
+        } else {
+          lastClickTime = now;
+          soundFx.playClick();
+        }
+      };
+
+      arena.appendChild(el);
+      arenaElements.push({ el, x, y, vx, vy, type: 'virus' });
+    }
+
+    // Movimentação flutuante dos pop-ups na tela
+    function moveArenaElements() {
+      const arena = document.getElementById('popupArena');
+      if (!arena) return;
+      const maxW = arena.clientWidth || 700;
+      const maxH = arena.clientHeight || 380;
+
+      for (let item of arenaElements) {
+        item.x += item.vx;
+        item.y += item.vy;
+
+        const elW = 88;
+        const elH = 78;
+
+        // Rebater nas bordas
+        if (item.x <= 5) {
+          item.x = 5;
+          item.vx = Math.abs(item.vx);
+        } else if (item.x >= maxW - elW - 5) {
+          item.x = maxW - elW - 5;
+          item.vx = -Math.abs(item.vx);
+        }
+
+        if (item.y <= 5) {
+          item.y = 5;
+          item.vy = Math.abs(item.vy);
+        } else if (item.y >= maxH - elH - 5) {
+          item.y = maxH - elH - 5;
+          item.vy = -Math.abs(item.vy);
+        }
+
+        item.el.style.left = `${item.x}px`;
+        item.el.style.top = `${item.y}px`;
+      }
+    }
+
+    // Destruição do Trojan pelo duplo clique
+    function destroyVirus(virusEl) {
+      if (!virusEl || virusEl.dataset.destroyed === 'true') return;
+      virusEl.dataset.destroyed = 'true';
+      virusEl.style.pointerEvents = 'none';
+      virusEl.onclick = null;
+      virusEl.ondblclick = null;
+
+      soundFx.playVirusPop();
+      virusEl.style.transform = "scale(0)";
+      setTimeout(() => {
+        if (virusEl.parentElement) {
+          virusEl.parentElement.removeChild(virusEl);
+        }
+      }, 150);
+
+      // Remove da lista ativa de animação
+      arenaElements = arenaElements.filter(item => item.el !== virusEl);
+      
+      // Incrementa os eliminados e recalcula restantes
+      gameState.eliminatedTrojans = (gameState.eliminatedTrojans || 0) + 1;
+      const remaining = Math.max(0, TOTAL_TROJANS - gameState.eliminatedTrojans);
+      gameState.virusesRemaining = remaining;
+      updatePhase2Status();
+
+      // Checa vitória da fase 2: SÓ avança se TODOS OS 10 Trojans foram eliminados de fato!
+      if (gameState.eliminatedTrojans >= TOTAL_TROJANS && !gameState.phase2Solved) {
+        gameState.phase2Solved = true;
+        soundFx.playSuccess();
+        if (arenaAnimationInterval) clearInterval(arenaAnimationInterval);
+
+        const feedback = document.getElementById('phase2Feedback');
+        if (feedback) {
+          feedback.className = "feedback-msg success";
+          feedback.style.display = "block";
+          feedback.innerHTML = "✅ ACESSO 2 LIBERADO! Todos os 10 Trojans foram eliminados pelo clique duplo rápido. O Enigma 1.3 foi desbloqueado!";
+        }
+
+        const tab2 = document.getElementById('tabBtn2');
+        if (tab2) {
+          tab2.classList.add('completed');
+          tab2.innerHTML = '<span>✔</span> Enigma 1.2';
+        }
+
+        const tab3 = document.getElementById('tabBtn3');
+        if (tab3) {
+          tab3.classList.remove('locked');
+          tab3.innerHTML = '<span>🔓</span> Enigma 1.3';
+        }
+
+        updateGlobalProgress();
+
+        setTimeout(() => {
+          switchTab(3);
+        }, 1300);
+      }
+    }
+
+    function updatePhase2Status() {
+      const el = document.getElementById('virusCounterText');
+      if (el) {
+        el.textContent = `👾 Trojans restantes: ${Math.max(0, gameState.virusesRemaining)} / 10`;
+      }
+    }
+
+    function showTemporaryFeedback(elementId, message, isError) {
+      const fb = document.getElementById(elementId);
+      fb.className = isError ? "feedback-msg error" : "feedback-msg success";
+      fb.textContent = message;
+      fb.style.display = "block";
+      setTimeout(() => {
+        if (fb.textContent === message) {
+          fb.style.display = "none";
+        }
+      }, 3500);
+    }
+
+    /* =========================================================
+       LÓGICA DO ENIGMA 1.3: Drag and Drop (Arrastar e Soltar)
+       ========================================================= */
+    function initPhase3() {
+      const grid = document.getElementById('filesGrid');
+      grid.innerHTML = '';
+
+      // Embaralha os 9 arquivos com Fisher-Yates para garantir distribuição imprevisível e mista
+      const shuffledFiles = [...gameState.files];
+      for (let i = shuffledFiles.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledFiles[i], shuffledFiles[j]] = [shuffledFiles[j], shuffledFiles[i]];
+      }
+
+      shuffledFiles.forEach(file => {
+        const card = document.createElement('div');
+        card.className = 'file-card';
+        card.id = `card-${file.id}`;
+        card.draggable = true;
+        card.setAttribute('data-target', file.targetFolder);
+        card.setAttribute('data-id', file.id);
+
+        card.innerHTML = `
+          <span class="file-icon">${file.icon}</span>
+          <span class="file-name">${file.name}</span>
+        `;
+
+        // Eventos padrão da API HTML5 Drag and Drop
+        card.ondragstart = function(e) {
+          soundFx.playClick();
+          e.dataTransfer.setData('text/plain', JSON.stringify({
+            id: file.id,
+            name: file.name,
+            targetFolder: file.targetFolder,
+            icon: file.icon
+          }));
+          card.style.opacity = '0.5';
+        };
+
+        card.ondragend = function(e) {
+          card.style.opacity = '1';
+        };
+
+        // Suporte a clique direto para mover (acessibilidade / telas de toque)
+        card.onclick = function() {
+          soundFx.playClick();
+          const target = prompt(`Para qual pasta deseja mover "${file.name}"?\nDigite: DOCUMENTOS, IMAGENS ou PROGRAMAS:`);
+          if (!target) return;
+          const cleanTarget = target.trim().toUpperCase();
+          if (cleanTarget === file.targetFolder) {
+            soundFx.playSuccess();
+            if (card.parentElement) card.parentElement.removeChild(card);
+            gameState.folderCounts[cleanTarget]++;
+            document.getElementById(`count-${cleanTarget}`).textContent = `${gameState.folderCounts[cleanTarget]} / 3 arquivos`;
+            const totalPlaced = gameState.folderCounts.DOCUMENTOS + gameState.folderCounts.IMAGENS + gameState.folderCounts.PROGRAMAS;
+            const remaining = 9 - totalPlaced;
+            document.getElementById('filesRemainingLabel').textContent = `${remaining} restantes`;
+            showTemporaryFeedback("phase3Feedback", `✅ Arquivo "${file.name}" arquivado em 📁 ${cleanTarget}!`, false);
+            if (totalPlaced === 9) {
+              triggerVictory();
+            }
+          } else {
+            soundFx.playError();
+            showTemporaryFeedback("phase3Feedback", `⚠️ Tipo de arquivo incompatível! O arquivo "${file.name}" não pertence à pasta 📁 ${cleanTarget}.`, true);
+          }
+        };
+
+        grid.appendChild(card);
+      });
+    }
+
+    // Permite soltar elemento na pasta
+    function allowDrop(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drag-hover');
+    }
+
+    function dragLeave(e) {
+      e.currentTarget.classList.remove('drag-hover');
+    }
+
+    // Manipula o evento de soltar (Drop)
+    function handleDrop(e, targetFolderName) {
+      e.preventDefault();
+      const dropzone = e.currentTarget;
+      dropzone.classList.remove('drag-hover');
+
+      const dataStr = e.dataTransfer.getData('text/plain');
+      if (!dataStr) return;
+
+      const fileData = JSON.parse(dataStr);
+
+      // Validação: Checa se a pasta receptora bate com o tipo do arquivo
+      if (fileData.targetFolder === targetFolderName) {
+        soundFx.playSuccess();
+        // Sucesso: Arquivo entra na pasta
+        const cardEl = document.getElementById(`card-${fileData.id}`);
+        if (cardEl && cardEl.parentElement) {
+          cardEl.parentElement.removeChild(cardEl);
+        }
+
+        // Incrementa contagem da pasta
+        gameState.folderCounts[targetFolderName]++;
+        document.getElementById(`count-${targetFolderName}`).textContent = `${gameState.folderCounts[targetFolderName]} / 3 arquivos`;
+
+        // Atualiza arquivos restantes no pool
+        const totalPlaced = gameState.folderCounts.DOCUMENTOS + gameState.folderCounts.IMAGENS + gameState.folderCounts.PROGRAMAS;
+        const remaining = 9 - totalPlaced;
+        document.getElementById('filesRemainingLabel').textContent = `${remaining} restantes`;
+
+        // Notificação de sucesso leve
+        showTemporaryFeedback("phase3Feedback", `✅ Arquivo "${fileData.name}" arquivado em 📁 ${targetFolderName}!`, false);
+
+        // Se todos os 9 arquivos foram guardados corretamente: DISPARA VITÓRIA!
+        if (totalPlaced === 9) {
+          triggerVictory();
+        }
+      } else {
+        soundFx.playError();
+        // Erro: Arquivo incompatível com a pasta
+        showTemporaryFeedback("phase3Feedback", `⚠️ Tipo de arquivo incompatível! O arquivo "${fileData.name}" não pertence à pasta 📁 ${targetFolderName}.`, true);
+      }
+    }
+
+    /* =========================================================
+       VITÓRIA GERAL: PORTA DE FIREWALL 1 DESBLOQUEADA
+       ========================================================= */
+    /* =========================================================
+       TAREFA FINAL: SELECIONAR COM MOUSE E COPIAR
+       ========================================================= */
+    let finalSelectedText = '';
+    let finalTaskCompleted = false;
+
+    function trackFinalReportSelection() {
+      const sel = window.getSelection();
+      if (sel && !sel.isCollapsed) {
+        const text = sel.toString().trim();
+        if (text) {
+          finalSelectedText = text;
+          const preview = document.getElementById('finalSelectedPreview');
+          if (preview) {
+            const snippet = text.length > 25 ? text.substring(0, 25) + '...' : text;
+            preview.textContent = `Selecionado: "${snippet}"`;
+          }
+        }
+      }
+    }
+
+    document.addEventListener('selectionchange', function() {
+      const modal = document.getElementById('victoryModal');
+      if (modal && modal.classList.contains('show')) {
+        trackFinalReportSelection();
+      }
+    });
+
+    function copyFinalReportSelection() {
+      soundFx.playClick();
+      const sel = window.getSelection();
+      const activeText = (sel && !sel.isCollapsed ? sel.toString().trim() : '') || finalSelectedText;
+      const fb = document.getElementById('finalTaskFeedback');
+      const btn = document.getElementById('finalCopyBtn');
+
+      if (!activeText) {
+        soundFx.playAlert();
+        fb.className = "feedback-msg error";
+        fb.style.display = "block";
+        fb.innerHTML = "⚠️ NENHUM TEXTO SELECIONADO: Use o mouse para clicar, segurar e arrastar sobre todo o texto do relatório antes de clicar em Copiar!";
+        return;
+      }
+
+      // Validação: checar se selecionou todo o relatório
+      const hasHeader = activeText.toLowerCase().includes('relat') || activeText.toLowerCase().includes('seguran');
+      const hasKey = activeText.includes('CHAVE-FIREWALL-ALPHA-1999') || activeText.toLowerCase().includes('chave de acesso');
+      if (activeText.length < 220 || !hasHeader || !hasKey) {
+        soundFx.playAlert();
+        fb.className = "feedback-msg error";
+        fb.style.display = "block";
+        fb.innerHTML = "⚠️ SELEÇÃO INCOMPLETA: É necessário selecionar TODO o texto do relatório com o mouse (arraste do início até o fim) antes de clicar em Copiar!";
+        return;
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(activeText).catch(() => {});
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = activeText;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch(e) {}
+        document.body.removeChild(ta);
+      }
+
+      soundFx.playSuccess();
+      finalTaskCompleted = true;
+      btn.innerHTML = "✔ Texto Copiado!";
+      btn.style.background = "#dcfce7";
+      btn.style.color = "#14532d";
+
+      fb.className = "feedback-msg success";
+      fb.style.display = "block";
+      fb.innerHTML = "✅ TAREFA FINAL CONCLUÍDA! Relatório copiado para a Área de Transferência. Agora, cole o texto no documento de texto que criamos na pasta do Google Drive!";
+    }
+
+    function triggerVictory() {
+      gameState.phase3Solved = true;
+      soundFx.playVictoryFanfare();
+      const status = document.getElementById('statusBadge');
+      if (status) status.textContent = 'PORTA 1 DESBLOQUEADA';
+
+      const tab3 = document.getElementById('tabBtn3');
+      tab3.classList.add('completed');
+      tab3.innerHTML = '<span>✔</span> Enigma 1.3';
+
+      updateGlobalProgress();
+
+      // Exibe modal com flash na tela
+      const modal = document.getElementById('victoryModal');
+      modal.classList.add('show');
+    }
+
+    function restartEscapeRoom() {
+      soundFx.playClick();
+      const status = document.getElementById('statusBadge');
+      if (status) status.textContent = 'FIREWALL 1 ATIVO';
+
+      // Reinicia todos os dados
+      gameState.phase1Solved = false;
+      gameState.phase2Solved = false;
+      gameState.phase3Solved = false;
+      gameState.virusesRemaining = 10;
+      gameState.folderCounts = { DOCUMENTOS: 0, IMAGENS: 0, PROGRAMAS: 0 };
+      finalSelectedText = '';
+      finalTaskCompleted = false;
+
+      // Reinicia contadores visuais
+      document.getElementById('count-DOCUMENTOS').textContent = '0 / 3 arquivos';
+      document.getElementById('count-IMAGENS').textContent = '0 / 3 arquivos';
+      document.getElementById('count-PROGRAMAS').textContent = '0 / 3 arquivos';
+      document.getElementById('filesRemainingLabel').textContent = '9 restantes';
+      document.getElementById('phase1Input').value = '';
+      document.getElementById('phase1Feedback').style.display = 'none';
+      document.getElementById('phase2Feedback').style.display = 'none';
+      document.getElementById('phase3Feedback').style.display = 'none';
+
+      const finalFb = document.getElementById('finalTaskFeedback');
+      if (finalFb) finalFb.style.display = 'none';
+      const finalPrev = document.getElementById('finalSelectedPreview');
+      if (finalPrev) finalPrev.textContent = '(Nenhum texto selecionado ainda)';
+      const finalBtn = document.getElementById('finalCopyBtn');
+      if (finalBtn) {
+        finalBtn.innerHTML = '📋 Copiar';
+        finalBtn.style.background = '';
+        finalBtn.style.color = '';
+      }
+
+      // Tranca abas 2 e 3
+      const t1 = document.getElementById('tabBtn1');
+      t1.className = 'tab-button active';
+      t1.innerHTML = '<span>🔒</span> Enigma 1.1';
+
+      const t2 = document.getElementById('tabBtn2');
+      t2.className = 'tab-button locked';
+      t2.innerHTML = '<span>🔒</span> Enigma 1.2';
+
+      const t3 = document.getElementById('tabBtn3');
+      t3.className = 'tab-button locked';
+      t3.innerHTML = '<span>🔒</span> Enigma 1.3';
+
+      document.getElementById('victoryModal').classList.remove('show');
+
+      updateGlobalProgress();
+      initPhase3();
+      switchTab(1);
+    }
+
+    // Inicialização da página
+    window.addEventListener('DOMContentLoaded', () => {
+      initPhase3();
+    });
+  </script>
+</body>
+</html>
