@@ -1397,11 +1397,12 @@ NÍVEL DE PERMISSÃO: AUTORIZADO PARA AVANÇAR À PORTA 2
       el.onclick = function(e) {
         e.stopPropagation();
         const now = Date.now();
-        if (now - lastVirusClick < 550) {
+        if (now - lastVirusClick < 450) {
           destroyVirus(el);
           lastVirusClick = 0;
         } else {
           lastVirusClick = now;
+          soundFx.playClick();
         }
       };
 
@@ -1464,37 +1465,51 @@ NÍVEL DE PERMISSÃO: AUTORIZADO PARA AVANÇAR À PORTA 2
 
     // Destruição do vírus pelo duplo clique
     function destroyVirus(virusEl) {
-      if (!virusEl.parentElement) return;
+      if (!virusEl || virusEl.dataset.destroyed === 'true') return;
+      virusEl.dataset.destroyed = 'true';
+      virusEl.style.pointerEvents = 'none';
+      virusEl.onclick = null;
+      virusEl.ondblclick = null;
+
       soundFx.playVirusPop();
       virusEl.style.transform = "scale(0)";
       setTimeout(() => {
         if (virusEl.parentElement) {
           virusEl.parentElement.removeChild(virusEl);
         }
-      }, 100);
+      }, 150);
 
       // Remove da lista ativa
-      arenaElements = arenaElements.filter(item => item.el !== virusEl);
-      gameState.virusesRemaining--;
+      arenaElements = arenaElements.filter(item => item.el !== virusEl && item.el.id !== virusEl.id);
+      
+      // Contagem REAL e precisa dos vírus que restam na arena:
+      const actualRemainingViruses = arenaElements.filter(item => item.type === 'virus').length;
+      gameState.virusesRemaining = actualRemainingViruses;
       updatePhase2Status();
 
-      // Checa vitória da fase 2
-      if (gameState.virusesRemaining <= 0) {
+      // Checa vitória da fase 2: SÓ avança se o total REAL de vírus restantes for EXATAMENTE ZERO!
+      if (actualRemainingViruses === 0 && !gameState.phase2Solved) {
         gameState.phase2Solved = true;
         soundFx.playSuccess();
         if (arenaAnimationInterval) clearInterval(arenaAnimationInterval);
 
         const feedback = document.getElementById('phase2Feedback');
-        feedback.className = "feedback-msg success";
-        feedback.innerHTML = "✅ ACESSO 2 LIBERADO! Todos os 10 vírus foram erradicados pelo clique duplo rápido. O Enigma 1.3 foi desbloqueado!";
+        if (feedback) {
+          feedback.className = "feedback-msg success";
+          feedback.innerHTML = "✅ ACESSO 2 LIBERADO! Todos os 10 vírus foram erradicados pelo clique duplo rápido. O Enigma 1.3 foi desbloqueado!";
+        }
 
         const tab2 = document.getElementById('tabBtn2');
-        tab2.classList.add('completed');
-        tab2.innerHTML = '<span>✔</span> Enigma 1.2';
+        if (tab2) {
+          tab2.classList.add('completed');
+          tab2.innerHTML = '<span>✔</span> Enigma 1.2';
+        }
 
         const tab3 = document.getElementById('tabBtn3');
-        tab3.classList.remove('locked');
-        tab3.innerHTML = '<span>🔓</span> Enigma 1.3';
+        if (tab3) {
+          tab3.classList.remove('locked');
+          tab3.innerHTML = '<span>🔓</span> Enigma 1.3';
+        }
 
         updateGlobalProgress();
 
@@ -1513,8 +1528,10 @@ NÍVEL DE PERMISSÃO: AUTORIZADO PARA AVANÇAR À PORTA 2
       const arena = document.getElementById('popupArena');
       const maxW = arena.clientWidth || 700;
       const maxH = arena.clientHeight || 380;
-      gameState.virusesRemaining++;
       createVirusElement(arena, maxW, maxH, Math.floor(Math.random() * 99) + 10);
+      
+      const actualRemainingViruses = arenaElements.filter(item => item.type === 'virus').length;
+      gameState.virusesRemaining = actualRemainingViruses;
       updatePhase2Status();
     }
 
